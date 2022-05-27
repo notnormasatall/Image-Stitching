@@ -5,6 +5,25 @@ import numpy as np
 import imageio as iio
 
 
+def plot_DoG(DoG: list):
+    """
+    Plots octave space.
+    """
+    fig = plt.figure(figsize=(25, 15))
+
+    m = len(DoG)
+    n = len(DoG[0])
+    i = 1
+
+    for oct_idx, octave in enumerate(DoG):
+        for lay_idx, layer in enumerate(octave):
+            ax = fig.add_subplot(n, m, i)
+            imgplot = plt.imshow(DoG[oct_idx][lay_idx])
+            i += 1
+
+    plt.show()
+
+
 def get_plot_data(points: list, magnitude: list, vector=False, blob=False):
     '''
     Extracts location and angle from the keypoint to construct point's orientation.

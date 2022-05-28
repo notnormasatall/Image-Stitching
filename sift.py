@@ -1,5 +1,4 @@
 from functools import cmp_to_key
-import itertools
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -7,7 +6,7 @@ import cv2
 from cv2 import KeyPoint
 from visualization import *
 
-IMG_PATH = "./images/rivne1.JPG"
+IMG_PATH = "./images/naruto.png"
 
 
 def read_image(path: str, rgb=True) -> np.array:
@@ -586,3 +585,43 @@ def draw_matches(img1, img2, kp1, kp2, good):
 
 if __name__ == "__main__":
     BASE_IMG = gen_base_image(IMG_PATH)
+
+    # octave pyramid
+    pyramid = construct_octave_pyramid(BASE_IMG)
+    diff = generate_dog(pyramid=pyramid)
+
+    # visualize octaves
+    plot_DoG(diff, save=True)
+
+    # find extremes
+    octaves, images, keypoints = detect_extrema(diff, debug=False)
+
+    # visualize all extremes
+    visualize_points(points=keypoints, path=IMG_PATH, save=True)
+
+    # localization
+    correct_keypoints, incorrect_keypoints = localize_extremas(keypoints, diff)
+
+    # plot localization results
+    make_two_plots(correct_keypoints,
+                   incorrect_keypoints,
+                   [f"Correct Keypoints {len(correct_keypoints)}",
+                    f"Incorrect Keypoints {len(incorrect_keypoints)}"],
+                   IMG_PATH, save=True)
+
+    # before & after localization
+    make_two_plots(keypoints,
+                   correct_keypoints,
+                   [f"Before Localization: {len(keypoints)}",
+                    f"After Localization: {len(correct_keypoints)}"],
+                   IMG_PATH, save=True)
+
+    # orientation
+    oriented_keypoints, magnitudes = keypoints_with_orientation(keypoints=correct_keypoints,
+                                                                images=pyramid)
+
+    # plot orientation results
+    plot_orientations(IMG_PATH, oriented_keypoints, magnitudes, save=True)
+
+    # plot blobs
+    plot_blobs(IMG_PATH, oriented_keypoints, save=True)

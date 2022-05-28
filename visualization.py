@@ -70,15 +70,18 @@ def visualize_points(points: list, path: str, save=False):
     '''
     Plots keypoints for a given image.
     '''
-    if points:
-        x, y, u, v, r = get_plot_data(points=points, magnitude=[], base=True)
+    x, y, u, v, r = get_plot_data(points=points, magnitude=[], base=True)
 
     fig = plt.figure(figsize=(25, 15))
 
     image = iio.imread(path)
     imgplot = plt.imshow(image, cmap='gray')
     plt.scatter(x=x, y=y, c='r', s=10)
-    plt.title("Image extremes")
+
+    if not points:
+        plt.title("Original Image")
+    else:
+        plt.title("Image extremes")
     if save:
         plt.savefig(gen_file_name() + 'Points.png')
 

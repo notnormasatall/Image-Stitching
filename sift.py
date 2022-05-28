@@ -584,6 +584,9 @@ def draw_matches(img1, img2, kp1, kp2, good):
 
 
 if __name__ == "__main__":
+    # plot original
+    visualize_points(points=[], path=IMG_PATH, save=True)
+
     BASE_IMG = gen_base_image(IMG_PATH)
 
     # octave pyramid

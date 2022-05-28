@@ -66,7 +66,7 @@ def get_plot_data(points: list, magnitude: list, vector=False, blob=False, base=
     return x, y, u, v, r
 
 
-def visualize_points(points: list, path: str, save=False):
+def visualize_points(points: list, path: str, title="Image extremes", save=False):
     '''
     Plots keypoints for a given image.
     '''
@@ -81,7 +81,7 @@ def visualize_points(points: list, path: str, save=False):
     if not points:
         plt.title("Original Image")
     else:
-        plt.title("Image extremes")
+        plt.title(title)
     if save:
         plt.savefig(gen_file_name() + 'Points.png')
     plt.show()

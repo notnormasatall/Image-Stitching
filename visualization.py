@@ -84,7 +84,6 @@ def visualize_points(points: list, path: str, save=False):
         plt.title("Image extremes")
     if save:
         plt.savefig(gen_file_name() + 'Points.png')
-
     plt.show()
 
 

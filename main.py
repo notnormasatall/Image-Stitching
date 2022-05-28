@@ -19,8 +19,8 @@ if __name__ == "__main__":
     matches = match_feautures(des1, des2)
 
     draw_matches(img1, img2, kp1, kp2, matches)
-    src_pts = np.float32([ kp1[m[0].queryIdx].pt for m in matches]).reshape(-1, 1, 2)
-    dst_pts = np.float32([ kp2[m[0].trainIdx].pt for m in matches]).reshape(-1, 1, 2)
+    src_pts = np.float32([kp1[m[0].queryIdx].pt for m in matches]).reshape(-1, 1, 2)
+    dst_pts = np.float32([kp2[m[0].trainIdx].pt for m in matches]).reshape(-1, 1, 2)
     H = ransac(src_pts, dst_pts)
 
     dst = cv2.warpPerspective(img1,H,((img1.shape[1] + img2.shape[1]), img2.shape[0])) #wraped image

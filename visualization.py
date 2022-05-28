@@ -72,7 +72,7 @@ def visualize_points(points: list, path: str, save=False):
     '''
     x, y, u, v, r = get_plot_data(points=points, magnitude=[], base=True)
 
-    fig = plt.figure(figsize=(25, 15))
+    fig = plt.figure(figsize=(15, 15))
 
     image = iio.imread(path)
     imgplot = plt.imshow(image, cmap='gray')
@@ -121,7 +121,7 @@ def plot_orientations(path, oriented_keypoints: list, magnitudes: list, save=Fal
     x, y, u, v, r = get_plot_data(
         oriented_keypoints, magnitudes, vector=True, base=False)
 
-    fig = plt.figure(figsize=(25, 15))
+    fig = plt.figure(figsize=(15, 15))
 
     image = iio.imread(path)
     imgplot = plt.imshow(image, cmap='gray')
@@ -142,7 +142,7 @@ def plot_blobs(path, oriented_keypoints: list, save=False):
     x, y, u, v, r = get_plot_data(
         oriented_keypoints, magnitude=[], blob=True, base=False)
 
-    fig = plt.figure(figsize=(25, 15))
+    fig = plt.figure(figsize=(15, 15))
 
     image = iio.imread(path)
     imgplot = plt.imshow(image, cmap='gray')

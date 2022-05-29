@@ -109,7 +109,7 @@ class Interface:
         descriptors = sift.generate_descriptors(or_keypoints, pyramid)
         self._des[idx] = descriptors
         print(f"for image at {path} descriptors generated...")
-        print(len(or_keypoints), len(descriptors))
+        # print(len(or_keypoints), len(descriptors))
 
         if idx2 is not None:
             self._des[idx2] = descriptors

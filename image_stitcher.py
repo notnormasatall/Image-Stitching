@@ -34,7 +34,7 @@ class Interface:
             "show oriented keypoints": "/showort,<imagenum>",
             "draw matches between two pictures": "/drawmatches,<imagenum1>,<imagenum2>",
             "show picture": "/showpic,<imagenum>",
-            "stitch two images": "/stitch,<imagenum1>,<imagenum2>",
+            "show stitched result ": "/showres",
             "display options": "/help",
             "exit application": "/exit",
         }
@@ -47,7 +47,7 @@ class Interface:
             "/showort",
             "/drawmatches",
             "/showpic",
-            "/stitch",
+            "/showres",
             "/help",
             "/exit"
         ]
@@ -58,7 +58,8 @@ class Interface:
     def about(self):
         title = "SIFT & RANSAC in Image Stitching"
         authors = "Taras Rodzin, Yaroslav Romanus, Mykhailo Kuzmyn"
-        description = "Our application is aimed at helping YOU stitch multiple images into one high-rez image"
+        description = "Our application is aimed at helping YOU stitch multiple images into one high-rez image," \
+                      " please upload images right to left"
         to_start = "Here are some commands to help you navigate through our app:"
         print(title)
         print(f"created by {authors}")
@@ -105,9 +106,10 @@ class Interface:
         self._oriented_kp[idx] = or_keypoints
         print(f"for image at {path} keypoints oriented...")
 
-        descriptors = sift.generate_descriptors(keypoints, pyramid)
+        descriptors = sift.generate_descriptors(or_keypoints, pyramid)
         self._des[idx] = descriptors
         print(f"for image at {path} descriptors generated...")
+        print(len(or_keypoints), len(descriptors))
 
         if idx2 is not None:
             self._des[idx2] = descriptors
@@ -141,7 +143,7 @@ class Interface:
 
     def displaynums(self, *args):
         lst = [x + 1 for x in range(len(self._images))]
-        print(lst)
+        # print(lst)
         print(str(lst).replace(", ", " ")[1:-1])
 
     def displayall(self, *args):
@@ -228,46 +230,34 @@ class Interface:
             print(msg)
             print(self.get_prompt(len(msg)))
 
-    def stitch(self, indices):
-        indices = [int(x) - 1 for x in indices]
-        try:
-            assert (len(indices) == 2)
-            assert (indices[0] in range(len(self._kp)))
-            assert (indices[1] in range(len(self._kp)))
-            i, j = indices
-            path1, img1, kp1, des1 = self._paths[i], self._images[i], self._oriented_kp[i], self._des[i]
-            path2, img2, kp2, des2 = self._paths[j], self._images[j], self._oriented_kp[j], self._des[j]
+    def showres(self, *args):
+        self._matches = [sift.match_feautures(self._des[idx], self._des[idx + 1]) for idx in range(len(self._des) - 1)]
+        # print(len(self._matches))
+        msg = ("finished matching features")
+        print(msg)
+        print(self.get_prompt(len(msg)))
 
-            matches = sift.match_feautures(des1, des2)
-            print(kp1.shape)
-            print(des1.shape)
-            print(matches.shape)
+        self._src_pts = [None] * len(self._matches)
+        self._dst_pts = [None] * len(self._matches)
+        self._H = [None] * len(self._matches)
+        for idx, match in enumerate(self._matches):
+            self._src_pts[idx] = np.float32([self._oriented_kp[idx][m[0].queryIdx].pt for m in match]).reshape(-1, 1, 2)
+            self._dst_pts[idx] = np.float32([self._oriented_kp[idx + 1][m[0].trainIdx].pt for m in match]).reshape(-1, 1, 2)
+            self._H[idx] = ransac(self._src_pts[idx], self._dst_pts[idx])
 
-            sift.draw_matches(img1, img2, kp1, kp2, matches)
-            src_pts = np.float32(
-                [kp1[m[0].queryIdx].pt for m in matches]).reshape(-1, 1, 2)
-            dst_pts = np.float32(
-                [kp2[m[0].trainIdx].pt for m in matches]).reshape(-1, 1, 2)
-            H = ransac(src_pts, dst_pts)
+        # print(self._src_pts[0], '\n', self._dst_pts[0])
+        msg = "src and dst point created"
+        print(msg)
+        print(self.get_prompt(len(msg)))
 
-            dst = cv2.warpPerspective(
-                img1, H, ((img1.shape[1] + img2.shape[1]), img2.shape[0]))  # wraped image
-            dst[0:img2.shape[0], 0:img2.shape[1]] = img2  # stitched image
+        dst = self._images[0]
+        for idx, H in enumerate(self._H):
+            img = self._images[idx + 1]
+            dst = cv2.warpPerspective(dst, H, ((dst.shape[1] + img.shape[1]), img.shape[0]))  # wraped image
+            dst[0:img.shape[0], 0:img.shape[1]] = img  # stitched image
             plt.imshow(dst)
             plt.show()
-
-            new_path = f"{path1[:-3]}_(1).png"
-            cv2.imwrite(new_path, dst)
-            combined_msg = f"image combined from images {i + 1} and {j + 1}"
-            self._paths[i], self._paths[j] = combined_msg, combined_msg
-            self._images[i], self._images[j] = dst, dst
-            self._paths[i], self._paths[j] = new_path
-            self.process_image(new_path, idx=i, idx2=j)
-
-        except AssertionError:
-            msg = "one of the images does not exist..."
-        print(msg)
-        print(self.get_prompt(9))
+            print(f"combined images {str(list(range(1, idx + 3)))[1:-1]} is shown")
 
     def help(self, *args):
         self.display_options()

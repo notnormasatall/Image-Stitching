@@ -15,6 +15,7 @@ import sift
 from ransac import ransac
 from visualization import visualize_points, plot_DoG, plot_orientations
 
+
 class Interface:
     def __init__(self):
         self._images = list()
@@ -25,37 +26,37 @@ class Interface:
         self._des = list()
         self._magnitudes = list()
         self._options = {
-                "upload image": "/upload,<path>",
-                "display number of images": "/displaynums",
-                "display all images": "/displayall",
-                "display difference of gaussian for set image": "/showdog,<imagenum>",
-                "show all extremas": "/showkp,<imagenum>",
-                "show oriented keypoints": "showort,<imagenum>",
-                "draw matches between two pictures": "/drawmatches,<imagenum1>,<imagenum2>",
-                "show picture": "/showpic,<imagenum>",
-                "stitch two images": "/stitch,<imagenum1>,<imagenum2>",
-                "display options": "/help",
-                "exit application": "/exit",
-            }
+            "upload image": "/upload,<path>",
+            "display number of images": "/displaynums",
+            "display all images": "/displayall",
+            "display difference of gaussian for set image": "/showdog,<imagenum>",
+            "show all extremas": "/showkp,<imagenum>",
+            "show oriented keypoints": "/showort,<imagenum>",
+            "draw matches between two pictures": "/drawmatches,<imagenum1>,<imagenum2>",
+            "show picture": "/showpic,<imagenum>",
+            "stitch two images": "/stitch,<imagenum1>,<imagenum2>",
+            "display options": "/help",
+            "exit application": "/exit",
+        }
         self._commands = [
-                "/upload",
-                "/displaynums",
-                "/displayall",
-                "/showdog",
-                "/showkp",
-                "/showort",
-                "/drawmatches",
-                "/showpic",
-                "/stitch",
-                "/help",
-                "/exit"
-            ]
+            "/upload",
+            "/displaynums",
+            "/displayall",
+            "/showdog",
+            "/showkp",
+            "/showort",
+            "/drawmatches",
+            "/showpic",
+            "/stitch",
+            "/help",
+            "/exit"
+        ]
 
     def _display_image(self, idx):
         plt.imshow(self._images)
 
     def about(self):
-        title =  "SIFT & RANSAC in Image Stitching"
+        title = "SIFT & RANSAC in Image Stitching"
         authors = "Taras Rodzin, Yaroslav Romanus, Mykhailo Kuzmyn"
         description = "Our application is aimed at helping YOU stitch multiple images into one high-rez image"
         to_start = "Here are some commands to help you navigate through our app:"
@@ -81,7 +82,7 @@ class Interface:
             func = getattr(self, func_name)
             func(opt[1:])
 
-    def get_prompt(self, length, ch = '_'):
+    def get_prompt(self, length, ch='_'):
         return ch * length
 
     def process_image(self, path, idx, idx2=None):
@@ -95,8 +96,10 @@ class Interface:
         self._kp[idx] = keypoints
         print(f"for image at {path} keypoints detected...")
 
-        correct_keypoints, incorrect_keypoints = sift.localize_extremas(keypoints, diff)
-        oriented_keypoints, magnitudes = sift.keypoints_with_orientation(keypoints=correct_keypoints,                                                       images=pyramid)
+        correct_keypoints, incorrect_keypoints = sift.localize_extremas(
+            keypoints, diff)
+        oriented_keypoints, magnitudes = sift.keypoints_with_orientation(
+            keypoints=correct_keypoints,                                                       images=pyramid)
         or_keypoints = sift.handle_duplicates(oriented_keypoints)
         self._magnitudes[idx] = magnitudes
         self._oriented_kp[idx] = or_keypoints
@@ -183,7 +186,8 @@ class Interface:
             try:
                 assert (i > 0 and i <= len(self._images))
                 idx = i - 1
-                path, img, kp, magnitudes = self._paths[idx], self._images[idx], self._oriented_kp[idx], self._magnitudes[idx]
+                path, img, kp, magnitudes = self._paths[idx], self._images[
+                    idx], self._oriented_kp[idx], self._magnitudes[idx]
                 plot_orientations(path, kp, magnitudes)
                 msg = f"oriented keypoints for image at {path} visualized..."
             except AssertionError:
@@ -240,11 +244,14 @@ class Interface:
             print(matches.shape)
 
             sift.draw_matches(img1, img2, kp1, kp2, matches)
-            src_pts = np.float32([kp1[m[0].queryIdx].pt for m in matches]).reshape(-1, 1, 2)
-            dst_pts = np.float32([kp2[m[0].trainIdx].pt for m in matches]).reshape(-1, 1, 2)
+            src_pts = np.float32(
+                [kp1[m[0].queryIdx].pt for m in matches]).reshape(-1, 1, 2)
+            dst_pts = np.float32(
+                [kp2[m[0].trainIdx].pt for m in matches]).reshape(-1, 1, 2)
             H = ransac(src_pts, dst_pts)
 
-            dst = cv2.warpPerspective(img1, H, ((img1.shape[1] + img2.shape[1]), img2.shape[0]))  # wraped image
+            dst = cv2.warpPerspective(
+                img1, H, ((img1.shape[1] + img2.shape[1]), img2.shape[0]))  # wraped image
             dst[0:img2.shape[0], 0:img2.shape[1]] = img2  # stitched image
             plt.imshow(dst)
             plt.show()
@@ -268,10 +275,10 @@ class Interface:
     def exit(self, *args):
         sys.exit()
 
+
 if __name__ == "__main__":
     interface = Interface()
     interface.about()
     while True:
         option = input()
         interface.process_option(option)
-

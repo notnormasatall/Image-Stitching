@@ -31,6 +31,7 @@ class Interface:
             "display all images": "/displayall",
             "display difference of gaussian for set image": "/showdog,<imagenum>",
             "show all extremas": "/showkp,<imagenum>",
+            "clear cache": "/clear",
             "show oriented keypoints": "/showort,<imagenum>",
             "draw matches between two pictures": "/drawmatches,<imagenum1>,<imagenum2>",
             "show picture": "/showpic,<imagenum>",
@@ -44,6 +45,7 @@ class Interface:
             "/displayall",
             "/showdog",
             "/showkp",
+            "/clear",
             "/showort",
             "/drawmatches",
             "/showpic",
@@ -109,7 +111,7 @@ class Interface:
         descriptors = sift.generate_descriptors(or_keypoints, pyramid)
         self._des[idx] = descriptors
         print(f"for image at {path} descriptors generated...")
-        # print(len(or_keypoints), len(descriptors))
+        print(f"number of keypoints for the image {len(or_keypoints)}")
 
         if idx2 is not None:
             self._des[idx2] = descriptors
@@ -230,7 +232,8 @@ class Interface:
             print(msg)
             print(self.get_prompt(len(msg)))
 
-    def showres(self, *args):
+    def showres(self, save_path = None):
+        # print(save_path)
         self._matches = [sift.match_feautures(self._des[idx], self._des[idx + 1]) for idx in range(len(self._des) - 1)]
         # print(len(self._matches))
         msg = ("finished matching features")
@@ -259,12 +262,25 @@ class Interface:
             plt.show()
             print(f"combined images {str(list(range(1, idx + 3)))[1:-1]} is shown")
 
+        plt.imshow(dst)
+        if save_path:
+            print(f"saving to {save_path}")
+            plt.savefig(save_path[0])
+        plt.show()
     def help(self, *args):
         self.display_options()
 
     def exit(self, *args):
         sys.exit()
 
+    def clear(self, *args):
+        self._images = list()
+        self._paths = list()
+        self._oriented_kp = list()
+        self._kp = list()
+        self._dog = list()
+        self._des = list()
+        self._magnitudes = list()
 
 if __name__ == "__main__":
     interface = Interface()

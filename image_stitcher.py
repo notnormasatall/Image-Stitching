@@ -3,13 +3,6 @@ import imageio as iio
 import cv2
 import sys
 import matplotlib.pyplot as plt
-import time
-
-from rich.progress import Progress
-from rich.table import Table
-from rich.console import Console
-from rich.prompt import Prompt, Confirm
-from pprint import pprint
 
 import sift
 from ransac import ransac
